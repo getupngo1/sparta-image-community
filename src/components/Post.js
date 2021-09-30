@@ -1,16 +1,32 @@
 //Post.js
 import React from "react";
+import Grid from "../elements/Grid";
+import Image from "../elements/image";
 
 const Post =(props) =>{
     
     return (
         <React.Fragment>
+            <Grid >
+                <Grid is_flex>
+
+                </Grid>
+                <Grid padding = "16px">
+                    <Image shape="circle" src={props.src}/>
+                </Grid>
+                <Grid>
+                    <Image shape="rectangle" src ={props.src}/>
+                </Grid>
+                <Grid padding="16px">
+                    
+                </Grid>
             <div>
                 user profile / user name / insert_dt 
             </div>
             <div>contents</div>
             <div>image</div>
             <div>comment cnt</div>
+            </Grid>
         </React.Fragment>
     )
 }
