@@ -1,7 +1,11 @@
 //Post.js
 import React from "react";
-import Grid from "../elements/Grid";
-import Image from "../elements/image";
+// import Grid from "../elements/Grid";
+// import Image from "../elements/image";
+// import Text from "../elements/Text";
+
+import {Grid, Image, Text} from "../elements"
+
 
 const Post =(props) =>{
     
@@ -9,23 +13,19 @@ const Post =(props) =>{
         <React.Fragment>
             <Grid >
                 <Grid is_flex>
-
+                    <Image shape="circle" src={props.src}/>
+                    <Text bold>{props.user_info.user_name}</Text>
+                    <Text>{props.insert_dt}</Text>
                 </Grid>
                 <Grid padding = "16px">
-                    <Image shape="circle" src={props.src}/>
+                <Text>{props.contents}</Text>
                 </Grid>
                 <Grid>
                     <Image shape="rectangle" src ={props.src}/>
                 </Grid>
                 <Grid padding="16px">
-                    
+                    <Text bold>댓글 {props.Comment_cnt}개</Text>
                 </Grid>
-            <div>
-                user profile / user name / insert_dt 
-            </div>
-            <div>contents</div>
-            <div>image</div>
-            <div>comment cnt</div>
             </Grid>
         </React.Fragment>
     )
