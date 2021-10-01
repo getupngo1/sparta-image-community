@@ -3,7 +3,6 @@ import React from "react";
 import styled from "styled-components";
 
 const Text = (props) => {
-    console.log(props)
 
     const {bold, color, size, children, margin} = props;
     
