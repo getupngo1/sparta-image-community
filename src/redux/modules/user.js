@@ -46,6 +46,12 @@ const loginFB = (id,pwd) => {
             // Signed in
             const user = userCredential.user;
             console.log(user)
+            dispatch(setUser({ 
+                user_name: user.displayName,
+                id: id,
+                user_profile: "",
+            }));
+            history.push("/");
             // ...
             // dispatch(setUser({ id: id, user_profile: ''}))
         })

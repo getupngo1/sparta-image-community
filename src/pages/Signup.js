@@ -52,7 +52,7 @@ const Signup = (props) => {
             label="닉네임"
             placeholder="닉네임을 입력해주세요."
             _onChange={(e) => {
-              console.log(e.target.value);
+              setUserName(e.target.value);
             }}
           />
         </Grid>

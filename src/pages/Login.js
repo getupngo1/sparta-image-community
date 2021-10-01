@@ -42,6 +42,7 @@ const Login = (props) => {
           <Input
             label="패스워드"
             placeholder="패스워드를 입력해주세요."
+            type="password"
             _onChange={(e) => {
               setPwd(e.target.value);
             }}
