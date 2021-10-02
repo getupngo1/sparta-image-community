@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import Permit from "../shared/Permit";
 
 const Button = (props) => {
 

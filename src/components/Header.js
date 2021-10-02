@@ -36,35 +36,8 @@ const Header = (props) => {
 
     console.log(is_session);
 
-    if (is_login && is_session) {
-        return (
-        <React.Fragment>
-            <Grid is_flex padding="4px 16px">
-            <Grid>
-                <Text margin="0px" size="24px" bold>
-                헬로
-                </Text>
-            </Grid>
-
-            <Grid is_flex>
-                <Button text="내정보"></Button>
-                <Button text="알림"></Button>
-                <Button
-                text="로그아웃"
-                _onClick={() => {
-                    dispatch(userActions.logoutFB());
-                    // dispatch(userActions.logOut({}));
-                    // deleteCookie("user_id");
-                }}
-                ></Button>
-            </Grid>
-            </Grid>
-        </React.Fragment>
-        );
-    }
-
-    
-    // <Permit>
+    // if (is_login && is_session) {
+    //     return (
     //     <React.Fragment>
     //         <Grid is_flex padding="4px 16px">
     //         <Grid>
@@ -87,8 +60,35 @@ const Header = (props) => {
     //         </Grid>
     //         </Grid>
     //     </React.Fragment>
-    // </Permit>
+    //     );
+    // }
+    if(is_login){
+        return(
+    <Permit>
+        <React.Fragment>
+            <Grid is_flex padding="4px 16px">
+            <Grid>
+                <Text margin="0px" size="24px" bold>
+                헬로
+                </Text>
+            </Grid>
 
+            <Grid is_flex>
+                <Button text="내정보"></Button>
+                <Button text="알림"></Button>
+                <Button
+                text="로그아웃"
+                _onClick={() => {
+                    dispatch(userActions.logoutFB());
+                    // dispatch(userActions.logOut({}));
+                    // deleteCookie("user_id");
+                }}
+                ></Button>
+            </Grid>
+            </Grid>
+        </React.Fragment>
+    </Permit>
+        )}
     return (
         <React.Fragment>
         <Grid is_flex padding="4px 16px">
