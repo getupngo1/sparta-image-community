@@ -13,7 +13,8 @@ import {
   signInWithEmailAndPassword,
   setPersistence,
   browserSessionPersistence,
-  onAuthStateChanged
+  onAuthStateChanged,
+  signOut
 } from "firebase/auth";
 
 //actions
@@ -158,6 +159,18 @@ const loginCheckFB = () => {
     }
 }
 
+const logoutFB = () =>{
+    return function (dispatch, getState, {history}) {
+        const auth = getAuth();
+        signOut(auth).then(()=>{
+            dispatch(logOut());
+            history.replace('/');
+        })
+
+    }
+
+}
+
 // reducer
 //action 안에 type과 payload가 있는데 payload가 받아온 값
 
@@ -189,6 +202,7 @@ const actionCreators = {
   signupFB,
   loginFB,
   loginCheckFB,
+  logoutFB,
 };
 
 export { actionCreators };
