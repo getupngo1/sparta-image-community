@@ -157,11 +157,11 @@ export default handleActions(
 
 //action export하는 부분
 
-const actioCreators = {
+const actionCreators = {
   setPost,
   addPost,
   getPostFB,
   addPostFB,
 };
 
-export { actioCreators };
+export { actionCreators };

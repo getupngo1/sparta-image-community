@@ -3,12 +3,14 @@ import {Grid, Text, Button, Image, Input} from "../elements";
 import Upload from "../shared/Upload";
 
 import { useSelector, useDispatch } from "react-redux";
-import { actioCreators as postActions } from "../redux/modules/post";
+import { actionCreators as postActions } from "../redux/modules/post";
 
 
 const PostWrite = (props) => {
     const dispatch = useDispatch();
     const is_login = useSelector((state)=> state.user.is_login);
+    const preview = useSelector((state)=> state.image.preview);
+
     const {history} = props;
 
     const [contents, setContents] = React.useState("");
@@ -44,7 +46,7 @@ const PostWrite = (props) => {
                     <Text margin="0px" size="24px" bold>미리보기</Text>
                 </Grid>
 
-                <Image shape="rectangle"/>
+                <Image shape="rectangle" src={preview? preview : "https://cdn-icons-png.flaticon.com/512/1555/1555492.png"}/>
             </Grid>
 
             <Grid padding="16px">
