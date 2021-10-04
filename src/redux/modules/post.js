@@ -1,9 +1,10 @@
 import { createAction, handleActions } from "redux-actions";
 import { produce } from "immer";
-import { firestore } from "../../shared/firebase";
+import { firestore, storage } from "../../shared/firebase";
 import "moment";
 import moment from "moment";
 
+import { actionCreators as imageActions } from "./image";
 
 //actions
 const SET_POST = "SET_POST";
@@ -36,8 +37,8 @@ const initialPost = {
 
 //middlewares
 
-const addPostFB = (contents="",) => {
-  return function (dispatch, getState, {history}){
+const addPostFB = (contents = "") => {
+  return function (dispatch, getState, { history }) {
     const postDB = firestore.collection("post");
     //getState로 스토어의 정보 가져옴(?)
     const _user = getState().user.user;
@@ -45,7 +46,7 @@ const addPostFB = (contents="",) => {
     const user_info = {
       user_name: _user.user_name,
       user_id: _user.uid,
-      user_profile: _user.user_profile
+      user_profile: _user.user_profile,
     };
 
     const _post = {
@@ -55,24 +56,50 @@ const addPostFB = (contents="",) => {
       insert_dt: moment().format("YYYY-MM-DD hh:mm:ss"),
     };
 
+    const _image = getState().image.preview;
+    console.log(_image);
+    console.log(typeof _image);
 
-    // console.log({...user_info, ..._post});
-    // return;
-   
-    // ~~.add({추가할정보})
-    //then((doc)=>{})  doc이란 이름으로 추가된 데이터 받아옴
-    postDB.add({...user_info, ..._post}).then((doc) =>{
+    const _upload = storage
+      .ref(`images/${user_info.user_id}_${new Date().getTime()}`)
+      .putString(_image, "data_url");
 
-      //모양새 바꿔서 넣어줘야하니 dispatch전에 생각하기
-      //리덕스데이터랑 파이어스토어 데이터랑 지금 형태가 다름
-      let post = {user_info, ..._post, id:doc.id};
-      dispatch(addPost(post));
-      history.replace("/");
-    }).catch((err) => {
-      console.log("post 작성에 실패했어요!", err);
-    }); 
-  }
-}
+    _upload.then((snapshot) => {
+      snapshot.ref
+        .getDownloadURL()
+        .then((url) => {
+          console.log(url);
+
+          return url;
+        })
+        .then((url) => {
+          // console.log({...user_info, ..._post});
+          // return;
+
+          // ~~.add({추가할정보})
+          //then((doc)=>{})  doc이란 이름으로 추가된 데이터 받아옴
+          postDB
+            .add({ ...user_info, ..._post, image_url:url })
+            .then((doc) => {
+              //모양새 바꿔서 넣어줘야하니 dispatch전에 생각하기
+              //리덕스데이터랑 파이어스토어 데이터랑 지금 형태가 다름
+              let post = { user_info, ..._post, id: doc.id, image_url:url };
+              dispatch(addPost(post));
+              history.replace("/");
+
+              dispatch(imageActions.setPreview(null));
+            })
+            .catch((err) => {
+              window.alert("앗! 포스트 작성에 문제가 있어요!")
+              console.log("post 작성에 실패했어요!", err);
+            });
+        }).catch((err) => {
+          window.alert("앗 이미지 업로드에 문제가 있어요!");
+          console.log("앗! 이미지 업로드에 문제가 있어요!", err);
+        } );
+    });
+  };
+};
 
 const getPostFB = () => {
   return function (dispatch, getState, { history }) {
@@ -145,12 +172,13 @@ export default handleActions(
         draft.list = action.payload.post_list;
       }),
 
-    [ADD_POST]: (state, action) => produce(state, (draft) => {
-      //여기서 .push가 아닌 unshift를 쓰는 이유는 배열의
-      //앞이 아닌 뒤로 넣어야 하기 때문에
-      //.push 는 배열위 앞에 붙음
-      draft.list.unshift(action.payload.post);
-    }),
+    [ADD_POST]: (state, action) =>
+      produce(state, (draft) => {
+        //여기서 .push가 아닌 unshift를 쓰는 이유는 배열의
+        //앞이 아닌 뒤로 넣어야 하기 때문에
+        //.push 는 배열위 앞에 붙음
+        draft.list.unshift(action.payload.post);
+      }),
   },
   initialState
 );
