@@ -40,7 +40,8 @@ const initialPost = {
 const addPostFB = (contents = "") => {
   return function (dispatch, getState, { history }) {
     const postDB = firestore.collection("post");
-    //getState로 스토어의 정보 가져옴(?)
+    console.log(postDB);
+    //getState로 스토어의 정보 가져옴
     const _user = getState().user.user;
 
     const user_info = {
@@ -52,7 +53,7 @@ const addPostFB = (contents = "") => {
     const _post = {
       ...initialPost,
       contents: contents,
-      //불려오는 시점 생각해서 여기서 한번 더 넣는 것 (?)
+      //불려오는 시점 생각해서 여기서 한번 더 넣는 것 
       insert_dt: moment().format("YYYY-MM-DD hh:mm:ss"),
     };
 
