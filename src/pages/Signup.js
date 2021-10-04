@@ -36,7 +36,7 @@ const Signup = (props) => {
 
     
 
-    dispatch(userActions.signupFB(id, pwd, user_name))
+    dispatch(userActions.signupFB(id, pwd, user_name));
   }
 
   return (
