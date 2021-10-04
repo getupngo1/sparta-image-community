@@ -9,10 +9,15 @@ import { actionCreators as imageActions } from "./image";
 //actions
 const SET_POST = "SET_POST";
 const ADD_POST = "ADD_POST";
+const EDIT_POST = "EDIT_POST";
 
 //action creators
 const setPost = createAction(SET_POST, (post_list) => ({ post_list }));
 const addPost = createAction(ADD_POST, (post) => ({ post }));
+const editPost = createAction(EDIT_POST, (post_id, post) => ({
+  post_id,
+  post,
+}));
 
 //initial state
 
@@ -37,6 +42,67 @@ const initialPost = {
 
 //middlewares
 
+//혹시라도 값이 안들어오면 튕겨내기 위해 null이랑 빈값줌
+const editPostFB = (post_id = null, post = {}) => {
+  return function (dispatch, getState, { history }) {
+    //아이디가 없으면 뒤가 모두 에러뜨기때문에 여기서 잡아줌
+    if (!post_id) {
+      window.alert("게시물 정보가 없어요!");
+      return;
+    }
+    const _image = getState().image.preview;
+
+    const _post_idx = getState().post.list.findIndex((p) => p.id === post_id);
+    const _post = getState().post.list[_post_idx];
+
+    console.log(_post);
+
+    const postDB = firestore.collection("post");
+
+    //현재 프리뷰의 이미지와 가져온 이미지가 같다면
+    //사진은 바꾸지 않은 것이기 때문에
+    if (_image === _post.image_url) {
+      postDB
+        .doc(post_id)
+        .update(post)
+        .then((doc) => {
+          dispatch(editPost(post_id, { ...post }));
+          history.replace("/");
+        });
+
+      return;
+    } else {
+      const user_id = getState().user.user.uid;
+      const _upload = storage
+        .ref(`images/${user_id}_${new Date().getTime()}`)
+        .putString(_image, "data_url");
+
+      _upload.then((snapshot) => {
+        snapshot.ref
+          .getDownloadURL()
+          .then((url) => {
+            console.log(url);
+
+            return url;
+          })
+          .then((url) => {
+            postDB
+              .doc(post_id)
+              .update({ ...post, image_url: url })
+              .then((doc) => {
+                dispatch(editPost(post_id, { ...post, image_url: url }));
+                history.replace("/");
+              });
+          })
+          .catch((err) => {
+            window.alert("앗 이미지 업로드에 문제가 있어요!");
+            console.log("앗! 이미지 업로드에 문제가 있어요!", err);
+          });
+      });
+    }
+  };
+};
+
 const addPostFB = (contents = "") => {
   return function (dispatch, getState, { history }) {
     const postDB = firestore.collection("post");
@@ -53,7 +119,7 @@ const addPostFB = (contents = "") => {
     const _post = {
       ...initialPost,
       contents: contents,
-      //불려오는 시점 생각해서 여기서 한번 더 넣는 것 
+      //불려오는 시점 생각해서 여기서 한번 더 넣는 것
       insert_dt: moment().format("YYYY-MM-DD hh:mm:ss"),
     };
 
@@ -80,24 +146,25 @@ const addPostFB = (contents = "") => {
           // ~~.add({추가할정보})
           //then((doc)=>{})  doc이란 이름으로 추가된 데이터 받아옴
           postDB
-            .add({ ...user_info, ..._post, image_url:url })
+            .add({ ...user_info, ..._post, image_url: url })
             .then((doc) => {
               //모양새 바꿔서 넣어줘야하니 dispatch전에 생각하기
               //리덕스데이터랑 파이어스토어 데이터랑 지금 형태가 다름
-              let post = { user_info, ..._post, id: doc.id, image_url:url };
+              let post = { user_info, ..._post, id: doc.id, image_url: url };
               dispatch(addPost(post));
               history.replace("/");
 
               dispatch(imageActions.setPreview(null));
             })
             .catch((err) => {
-              window.alert("앗! 포스트 작성에 문제가 있어요!")
+              window.alert("앗! 포스트 작성에 문제가 있어요!");
               console.log("post 작성에 실패했어요!", err);
             });
-        }).catch((err) => {
+        })
+        .catch((err) => {
           window.alert("앗 이미지 업로드에 문제가 있어요!");
           console.log("앗! 이미지 업로드에 문제가 있어요!", err);
-        } );
+        });
     });
   };
 };
@@ -180,6 +247,15 @@ export default handleActions(
         //.push 는 배열위 앞에 붙음
         draft.list.unshift(action.payload.post);
       }),
+    [EDIT_POST]: (state, action) =>
+      produce(state, (draft) => {
+        //findIndex로 조건에 맞는 것을 가져옴
+        //가져온 아이디와 현재 리덕스에 있는 list에 있는 아이디가 동일하면
+        let idx = draft.list.findIndex((p) => p.id === action.payload.post_id);
+
+        //이미지는 냅두고 게시글만 바꿀 수도 있게 스프레드문법을 씀
+        draft.list[idx] = { ...draft.list[idx], ...action.payload.post };
+      }),
   },
   initialState
 );
@@ -189,8 +265,10 @@ export default handleActions(
 const actionCreators = {
   setPost,
   addPost,
+  editPost,
   getPostFB,
   addPostFB,
+  editPostFB,
 };
 
 export { actionCreators };
