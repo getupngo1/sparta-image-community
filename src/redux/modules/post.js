@@ -173,6 +173,64 @@ const getPostFB = () => {
   return function (dispatch, getState, { history }) {
     const postDB = firestore.collection("post");
 
+    //쿼리 날려서 게시물 정렬
+    let query = postDB.orderBy("insert_dt","desc").limit(2);
+
+    query.get().then(docs => {
+      let post_list = [];
+      docs.forEach((doc) => {
+        // console.log(doc.id, doc.data());
+
+        //고수용 데이터 양식 맞추는 법
+        let _post = doc.data();
+        //키값들을 배열로 만들어 줌
+        //['comment_cnt', 'contents', ...] 이런 식으로
+        //배열이 되면 내장함수를 사용할 수 있음
+        //reduce라는 내장함수는 누산 -> 연산한것을 또 연산 순서대로
+        //1번째 인자(acc)는 누산된 값, 2번째 인자(cur)은 현재값
+
+        let post = Object.keys(_post).reduce(
+          (acc, cur) => {
+            //만약 cur(키값)에 user_ 가 포함이 되면(-1이아니면 포함이라는 뜻)
+            if (cur.indexOf("user_") !== -1) {
+              return {
+                ...acc,
+                user_info: { ...acc.user_info, [cur]: _post[cur] },
+              };
+            }
+            //3-3심화21분 다시보기
+            return { ...acc, [cur]: _post[cur] };
+          },
+          { id: doc.id, user_info: {} }
+        );
+        post_list.push(post);
+
+        // 하수용 데이터 양식 맞추는 법
+        // let _post = {
+        //     id: doc.id,
+        //     ...doc.data()
+        // };
+
+        // let post = {
+        //     id: doc.id,
+        //     user_info: {
+        //         user_name: _post.user_name,
+        //         user_profile: _post.user_profile,
+        //         user_id: _post.user_id,
+        //     },
+        //     image_url: _post.image_url,
+        //     contents: _post.contents,
+        //     Comment_cnt: _post.Comment_cnt,
+        //     insert_dt: _post.insert_dt,
+        // };
+        // post_list.push(post);
+      });
+      console.log(post_list);
+
+      dispatch(setPost(post_list));
+    });
+
+    return;
     postDB.get().then((docs) => {
       let post_list = [];
       docs.forEach((doc) => {
