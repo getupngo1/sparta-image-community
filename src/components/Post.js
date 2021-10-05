@@ -9,6 +9,7 @@ import { history } from "../redux/configureStore";
 import { Button, Grid, Image, Text } from "../elements";
 
 const Post = (props) => {
+  console.log(props);
   return (
     <React.Fragment>
       <Grid>
@@ -36,7 +37,7 @@ const Post = (props) => {
         </Grid>
         <Grid padding="16px">
           <Text margin="0px" bold>
-            댓글 {props.Comment_cnt}개
+            댓글 {props.comment_cnt}개
           </Text>
         </Grid>
       </Grid>

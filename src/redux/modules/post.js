@@ -39,7 +39,7 @@ const initialPost = {
   // },
   image_url: "https://t1.daumcdn.net/cfile/blog/246BD24252FF853D15",
   contents: "",
-  Comment_cnt: 0,
+  comment_cnt: 0,
   insert_dt: moment().format("YYYY-MM-DD hh:mm:ss"),
   // insert_dt: "2021-02-27 10:00:00",
 };

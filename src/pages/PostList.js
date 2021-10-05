@@ -46,7 +46,7 @@ const PostList =(props) =>{
                     //옵셔널체이닝 사용 ?로
                     if(p.user_info.user_id === user_info?.uid){
                     return (
-                        <Grid margin="10px 0px"bg="#ffffff" key={p.id} _onClick={() => {history.push(`/post/${p.id}`)}}>
+                        <Grid margin="10px 0px" bg="#ffffff" key={p.id} _onClick={() => {history.push(`/post/${p.id}`)}}>
                             <Post key={p.id} {...p} is_me/>
                         </Grid>
                     )

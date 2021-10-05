@@ -3,6 +3,8 @@ import Post from "../components/Post";
 import CommentList from "../components/CommentList";
 import CommentWrite from "../components/Commentwrite";
 
+import Permit from "../shared/Permit";
+
 import { useDispatch, useSelector } from "react-redux";
 import { firestore } from "../shared/firebase";
 
@@ -68,7 +70,9 @@ const PostDetail = (props) => {
         <React.Fragment>
             {post && <Post {...post} is_me={post.user_info.user_id === user_info?.uid}/>}
             {/* 여기서 게시글의 id를 props로 넘겨줌 */}
+            <Permit>
             <CommentWrite post_id = {id}/>
+            </Permit>
             <CommentList post_id = {id}/>
         </React.Fragment>
     )
