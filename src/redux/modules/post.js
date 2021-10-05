@@ -10,20 +10,24 @@ import { actionCreators as imageActions } from "./image";
 const SET_POST = "SET_POST";
 const ADD_POST = "ADD_POST";
 const EDIT_POST = "EDIT_POST";
+const LOADING = "LOADING";
 
 //action creators
-const setPost = createAction(SET_POST, (post_list) => ({ post_list }));
+const setPost = createAction(SET_POST, (post_list, paging) => ({ post_list, paging }));
 const addPost = createAction(ADD_POST, (post) => ({ post }));
 const editPost = createAction(EDIT_POST, (post_id, post) => ({
   post_id,
   post,
 }));
+const loading = createAction(LOADING, (is_loading) => ({is_loading}));
 
 //initial state
 
 //이 리듀서가 사용할 initialState
 const initialState = {
   list: [],
+  paging: {start: null, next: null, size: 3},
+  is_loading: false,
 };
 
 //게시글 하나에 대한 기본정보
@@ -169,15 +173,40 @@ const addPostFB = (contents = "") => {
   };
 };
 
-const getPostFB = () => {
+const getPostFB = (start = null, size = 3) => {
   return function (dispatch, getState, { history }) {
+    let _paging = getState().post.paging;
+
+    //start에 값이 있고 next에 없다면 다음 페이지가 없는 것이므로
+    // 뒤를 실행시키지 않기 위함
+    if(_paging.start && !_paging.next){
+      return;
+    }
+
     const postDB = firestore.collection("post");
 
+    // const size = getState().post.paging.size;
+    // console.log(size);
+    dispatch(loading(true));
     //쿼리 날려서 게시물 정렬
-    let query = postDB.orderBy("insert_dt","desc").limit(2);
+    let query = postDB.orderBy("insert_dt","desc");
 
-    query.get().then(docs => {
+    //여기 스타트 조건은 어디서 바꿔줬었음?
+    if(start){
+      query = query.startAt(start);
+    }
+
+    query.limit(size + 1)
+    .get().then(docs => {
       let post_list = [];
+
+      //paging
+      let paging = {
+        start: docs.docs[0],
+        next: docs.docs.length === size+1? docs.docs[docs.docs.length -1] : null,
+        size: size,
+      }
+
       docs.forEach((doc) => {
         // console.log(doc.id, doc.data());
 
@@ -225,9 +254,10 @@ const getPostFB = () => {
         // };
         // post_list.push(post);
       });
-      console.log(post_list);
+      post_list.pop();
+      // console.log(post_list);
 
-      dispatch(setPost(post_list));
+      dispatch(setPost(post_list, paging));
     });
 
     return;
@@ -295,7 +325,10 @@ export default handleActions(
   {
     [SET_POST]: (state, action) =>
       produce(state, (draft) => {
-        draft.list = action.payload.post_list;
+        draft.list.push(...action.payload.post_list);
+        // draft.list = action.payload.post_list;
+        draft.paging = action.payload.paging;
+        draft.is_loading = false;
       }),
 
     [ADD_POST]: (state, action) =>
@@ -313,6 +346,10 @@ export default handleActions(
 
         //이미지는 냅두고 게시글만 바꿀 수도 있게 스프레드문법을 씀
         draft.list[idx] = { ...draft.list[idx], ...action.payload.post };
+      }),
+      [LOADING]: (state, action) =>
+      produce(state, (draft) => {
+        draft.is_loading = action.payload.is_loading;
       }),
   },
   initialState
