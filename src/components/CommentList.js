@@ -1,20 +1,48 @@
 import React from "react";
 import {Grid, Image, Text} from "../elements";
 
+import { useDispatch, useSelector } from "react-redux";
+import { actionCreators as commentActions } from "../redux/modules/comment";
+
 const CommentList = (props) => {
+
+
+    const dispatch = useDispatch();
+    const comment_list = useSelector(state => state.comment.list);
+
+    //props에서 넘겨준 post_id가져옴
+    const {post_id} = props;
     
+    React.useEffect(()=>{
+
+        if(!comment_list[post_id]){
+            dispatch(commentActions.getCommentFB(post_id));
+        }
+    }, []);
+
+    if(!comment_list[post_id] || !post_id){
+        return null;
+    }
+
     return (
         <React.Fragment>
             <Grid padding = "16px">
+                {comment_list[post_id].map(c => {
+                    return <CommentItem key={c.id} {...c}/>
+                })}
+                {/* <CommentItem/>
                 <CommentItem/>
                 <CommentItem/>
                 <CommentItem/>
                 <CommentItem/>
-                <CommentItem/>
-                <CommentItem/>
+                <CommentItem/> */}
             </Grid>
         </React.Fragment>
     )
+}
+
+CommentList.defaultProps = {
+    post_id: null,
 }
 
 export default CommentList;

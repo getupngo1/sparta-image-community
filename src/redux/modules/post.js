@@ -317,6 +317,35 @@ const getPostFB = (start = null, size = 3) => {
   };
 };
 
+const getOnePostFB = (id) => {
+  return function(dispatch, getState, {history}){
+    const postDB = firestore.collection("post");
+    postDB.doc(id).get().then(doc => {
+      console.log(doc);
+      console.log(doc.data());
+
+      let _post = doc.data();
+      let post = Object.keys(_post).reduce(
+          (acc, cur) => {
+            //만약 cur(키값)에 user_ 가 포함이 되면(-1이아니면 포함이라는 뜻)
+            if (cur.indexOf("user_") !== -1) {
+              return {
+                ...acc,
+                user_info: { ...acc.user_info, [cur]: _post[cur] },
+              };
+            }
+            //3-3심화21분 다시보기
+            return { ...acc, [cur]: _post[cur] };
+          },
+          { id: doc.id, user_info: {} }
+        );
+          //대괄호쳐서 그냥 배열안에 넣어줌
+       dispatch(setPost([post]));
+  });
+
+  }
+}
+
 //reducer
 //action 안에 type과 payload가 있는데 payload가 받아온 값
 //불변성 유지를 위해 immer(produce) 사용
@@ -326,8 +355,23 @@ export default handleActions(
     [SET_POST]: (state, action) =>
       produce(state, (draft) => {
         draft.list.push(...action.payload.post_list);
+        //4-6 하나만 불러와서 목록으로 되돌아가기 했을 때
+        //중복이 생길 수 있으므로 reduce를 통해 중복제거
+        draft.list = draft.list.reduce((acc,cur)=>{
+          if(acc.findIndex(a => a.id === cur.id) === -1){
+            return [...acc, cur];
+          }else{
+            //4-6 8분 다시보기 ?
+            acc[acc.findIndex((a) => a.id === cur.id)] = cur;
+            return acc;
+          }
+        }, []);
         // draft.list = action.payload.post_list;
-        draft.paging = action.payload.paging;
+
+
+        if(action.payload.paging){
+          draft.paging = action.payload.paging;
+        }
         draft.is_loading = false;
       }),
 
@@ -364,6 +408,7 @@ const actionCreators = {
   getPostFB,
   addPostFB,
   editPostFB,
+  getOnePostFB,
 };
 
 export { actionCreators };
