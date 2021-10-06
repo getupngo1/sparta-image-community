@@ -71,9 +71,26 @@ const addCommentFB = (post_id, contents) => {
               })
             );
            
-            //참조 가져오는 것 (collection가져오는 것과 비슷)
-            const notiDB = realtime.ref(`noti/${post.user_info.user_id}`);
-            notiDB.update({read: false});
+            //ref참조 가져오는 것 (collection가져오는 것과 비슷)
+            //push를 하면 들어갈 공간을 봐둠, 그에 해당하는 키값을 가져올 수 있음
+            //사실 여기서는 push를 쓸 필요은 없음
+            const _noti_item = realtime.ref(`noti/${post.user_info.user_id}/list`).push();
+            // notiDB.update({read: false});
+            //set은 이 데이터를 넣을 것이란 뜻
+            _noti_item.set({
+              post_id: post.id,
+              user_name: comment.user_name,
+              image_url: post.image_url,
+              insert_dt: comment.insert_dt,
+            }, (err) => {
+              if(err){
+                window.alert("알림 저장에 실패했어요! 8ㅛ8");
+              }else{
+                const notiDB = realtime.ref(`noti/${post.user_info.user_id}`);
+
+                notiDB.update({read: false});
+              }
+            });
 
           }
           //dispatch()
