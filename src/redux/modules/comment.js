@@ -1,6 +1,6 @@
 import { createAction, handleActions } from "redux-actions";
 import { produce } from "immer";
-import { firestore } from "../../shared/firebase";
+import { firestore, realtime } from "../../shared/firebase";
 import "moment";
 import moment from "moment";
 
@@ -70,6 +70,11 @@ const addCommentFB = (post_id, contents) => {
                 comment_cnt: parseInt(post.comment_cnt) + 1,
               })
             );
+           
+            //참조 가져오는 것 (collection가져오는 것과 비슷)
+            const notiDB = realtime.ref(`noti/${post.user_info.user_id}`);
+            notiDB.update({read: false});
+
           }
           //dispatch()
         });
