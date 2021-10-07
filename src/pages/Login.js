@@ -7,6 +7,9 @@ import { emailCheck } from "../shared/common";
 
 const Login = (props) => {
   const dispatch = useDispatch();
+
+  // setCookie("user_pwd","hi2")
+  // console.log(getCookie("user_pwd"))
   
   const [id, setId] = React.useState("");
   const [pwd, setPwd] = React.useState("");
