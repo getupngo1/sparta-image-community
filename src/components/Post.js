@@ -31,7 +31,7 @@ const Post = React.memo((props)=>{
         </Grid>
         <Grid padding="16px">
           <Text>{props.contents}</Text>
-        </Grid>
+        </Grid> 
         <Grid>
           <Image shape="rectangle" src={props.image_url} />
         </Grid>
